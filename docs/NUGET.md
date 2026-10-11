@@ -2,6 +2,8 @@
 
 An unofficial C#/.NET 10 port of [RustySnek/librus-apix](https://github.com/RustySnek/librus-apix) for Librus Synergia. Supports Windows, Linux and macOS through the platform-neutral `net10.0` target.
 
+The original **librus-apix** library was authored by **Pascal Jodłowski** and is developed with its contributors. This C# port is maintained by LibrusApixNet contributors under **GPL-3.0-only**, following the [upstream LICENSE](https://github.com/RustySnek/librus-apix/blob/c54f05f3b483627328852825fff3e46fab27e87d/LICENSE). The package includes attribution and provenance in `NOTICE.md`.
+
 Provides authentication and sessions, numeric and descriptive grades, attendance, timetables, announcements, messages and recipients, homework, schedules, student information, completed lessons and notifications. This independent project is not affiliated with or endorsed by Librus or the upstream project.
 
 Source code and documentation: [wojciech-urbanowski/LibrusApixNet](https://github.com/wojciech-urbanowski/LibrusApixNet).

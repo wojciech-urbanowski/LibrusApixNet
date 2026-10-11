@@ -6,6 +6,12 @@ Copyright (C) 2026 LibrusApixNet contributors, for the C# port and its additions
 
 LibrusApixNet is a C#/.NET 10 port of [librus-apix](https://github.com/RustySnek/librus-apix), originally authored by Pascal Jodłowski and maintained with the librus-apix contributors. The module layout, behavior and two descriptive-grade regression scenarios were adapted from that project. Port-specific changes are documented in `docs/PORTING.md` and `docs/PORTING.en.md` in the source distribution.
 
+## librus-apix (original library)
+
+- Original author: **Pascal Jodłowski**, as recorded in the upstream [author metadata](https://github.com/RustySnek/librus-apix/blob/c54f05f3b483627328852825fff3e46fab27e87d/setup.cfg).
+- Upstream repository: [RustySnek/librus-apix](https://github.com/RustySnek/librus-apix), developed with the librus-apix contributors.
+- C# port and additions: **LibrusApixNet contributors**. This is a modified port, independently maintained from the original Python library.
+
 - Upstream release: **1.6.0**.
 - Upstream baseline: `c54f05f3b483627328852825fff3e46fab27e87d`.
 - Baseline date: 2026-10-10.

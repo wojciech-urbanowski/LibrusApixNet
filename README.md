@@ -4,6 +4,8 @@
 
 Biblioteka C# dla .NET 10 umożliwiająca korzystanie z danych Librus Synergia. Jest portem [librus-apix](https://github.com/RustySnek/librus-apix) i działa na Windows, Linux oraz macOS.
 
+Autorem oryginalnej biblioteki **librus-apix** jest **Pascal Jodłowski**; projekt rozwijają również jego współautorzy. Port zachowuje licencję **GNU GPL v3** (`GPL-3.0-only`) z [pliku LICENSE oryginału](https://github.com/RustySnek/librus-apix/blob/c54f05f3b483627328852825fff3e46fab27e87d/LICENSE). Autorstwo i pochodzenie kodu opisuje [NOTICE.md](NOTICE.md).
+
 ## Możliwości
 
 - Logowanie i korzystanie z zapisanej sesji.

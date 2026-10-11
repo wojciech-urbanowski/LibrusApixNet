@@ -4,6 +4,8 @@
 
 A C# library for .NET 10 that provides access to Librus Synergia data. It is a port of [librus-apix](https://github.com/RustySnek/librus-apix) and supports Windows, Linux and macOS.
 
+The original **librus-apix** library was authored by **Pascal Jodłowski** and is developed with its contributors. This port retains **GNU GPL v3** (`GPL-3.0-only`) from the [upstream LICENSE](https://github.com/RustySnek/librus-apix/blob/c54f05f3b483627328852825fff3e46fab27e87d/LICENSE). See [NOTICE.md](NOTICE.md) for attribution and provenance.
+
 ## Features
 
 - Authentication and saved sessions.
