@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - name: Restore
+        run: dotnet restore LibrusApixNet.slnx
+      - name: Build
+        run: dotnet build LibrusApixNet.slnx -c Release --no-restore
+      - name: Test
+        run: dotnet test LibrusApixNet.slnx -c Release --no-build --no-restore
+      - name: QuickStart help
+        run: dotnet run --project examples/QuickStart/QuickStart.csproj -c Release --no-build -- --help
+      - name: Test upstream comparison
+        run: ./tools/Test-CompareUpstream.ps1
+      - name: Pack library
+        run: dotnet pack src/LibrusApixNet/LibrusApixNet.csproj -c Release --no-build --no-restore
+      - name: Verify package and install in an isolated consumer
+        run: ./tools/Test-Package.ps1 -PackagePath ./artifacts/packages/LibrusApixNet.0.1.0.nupkg

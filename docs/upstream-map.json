@@ -1,0 +1,268 @@
+{
+  "schemaVersion": 1,
+  "repository": "https://github.com/RustySnek/librus-apix.git",
+  "commit": "2fedfe8ffa4933abb884929716519ddbeb8eb32d",
+  "commitDate": "2026-09-28",
+  "commitSubject": "fix: parse descriptive grades from new schema",
+  "sourceWorkingTreeClean": true,
+  "hashAlgorithm": "SHA256 of UTF-8 text with CRLF normalized to LF",
+  "modules": [
+    {
+      "source": "librus_apix/__init__.py",
+      "target": "src/LibrusApixNet/LibraryInfo.cs",
+      "symbols": {
+        "get_version": "LibraryInfo.GetVersion",
+        "version": "LibraryInfo.Version"
+      },
+      "sha256": "f3967466cf632ce609c3a2ac81f59bf497b35414b747367bc7fb7b65e8d5fd87"
+    },
+    {
+      "source": "librus_apix/client.py",
+      "target": "src/LibrusApixNet/Client.cs",
+      "symbols": {
+        "Token": "Token",
+        "Token.__init__": "Token constructor",
+        "Token.__repr__": "Token.ToString",
+        "Token._parse_api_key": "Token.AccessCookies",
+        "Token.access_cookies": "Token.AccessCookies",
+        "Client": "Client",
+        "Client.__init__": "Client constructor; ClientOptions in Urls.cs",
+        "Client.get_token": "Client.GetTokenAsync",
+        "Client.refresh_oauth": "Client.RefreshOAuthAsync",
+        "Client.post": "Client.PostAsync",
+        "Client.get": "Client.GetAsync",
+        "new_client": "Client.NewClient"
+      },
+      "sha256": "95d6233857b3e72cc11cb11e0b8ab639013fbd81806ef051132811d714b8a4e3"
+    },
+    {
+      "source": "librus_apix/urls.py",
+      "target": "src/LibrusApixNet/Urls.cs",
+      "symbols": {
+        "HEADERS": "ClientOptions.UserAgent; FormUrlEncodedContent in Client.cs",
+        "*_URL": "ClientOptions.*Url",
+        "GATEWAY_API_ATTENDANCE": "ClientOptions.GatewayApiAttendanceUrl"
+      },
+      "sha256": "b32f04601ae6fb05ad26ab92ade59bbb291ffe3a3d2f41efb1ffeb488945a974"
+    },
+    {
+      "source": "librus_apix/helpers.py",
+      "target": "src/LibrusApixNet/Helpers.cs",
+      "symbols": {
+        "no_access_check": "Html.Parse"
+      },
+      "sha256": "35fcb2da4936203585f06e4e5827fa403a3f23e6ae66a4ce3c596a36c075b59d"
+    },
+    {
+      "source": "librus_apix/exceptions.py",
+      "target": "src/LibrusApixNet/Exceptions.cs",
+      "symbols": {
+        "TokenKeyError": "TokenKeyException",
+        "ArgumentError": "LibrusArgumentException",
+        "TokenError": "TokenException",
+        "AuthorizationError": "AuthorizationException",
+        "ParseError": "ParseException",
+        "DateError": "DateException",
+        "MaintananceError": "MaintenanceException"
+      },
+      "sha256": "0ee41d95b94a962444e80f1a72ebecd6638674951db180b95db9d6c1106c7da8"
+    },
+    {
+      "source": "librus_apix/grades.py",
+      "target": "src/LibrusApixNet/Grades.cs",
+      "symbols": {
+        "Gpa": "Gpa",
+        "Grade": "Grade",
+        "Grade.value": "Grade.Value",
+        "GradeDescriptive": "GradeDescriptive",
+        "get_grades": "Grades.GetGradesAsync; GradesResult",
+        "_handle_subject": "Grades.Parse (subject cells)",
+        "_get_desc_and_counts": "Grades.ExtractGradeInfo",
+        "_extract_grade_info": "Grades.ExtractGradeInfo",
+        "_extract_grades_numeric": "Grades.Parse (numericMarker)",
+        "_extract_grades_descriptive": "Grades.Parse (descriptiveMarker and summary)"
+      },
+      "sha256": "3c4dd7e6464b13ebf99df87cec1b7802965c7b6e819ef6ae197af8747b36b5b5"
+    },
+    {
+      "source": "librus_apix/attendance.py",
+      "target": "src/LibrusApixNet/Attendance.cs",
+      "symbols": {
+        "Attendance": "Attendance",
+        "get_attendance": "Attendances.GetAttendanceAsync; Attendances.Parse",
+        "get_detail": "Attendances.GetDetailAsync; Attendances.ParseDetail",
+        "_get_subject_attendance": "Attendances.GetSubjectAttendanceAsync (Request and SubjectForLesson local functions)",
+        "get_subject_frequency": "Attendances.GetSubjectFrequencyAsync; Attendances.CalculateSubjectFrequency",
+        "get_gateway_attendance": "Attendances.GetGatewayAttendanceAsync; GatewayAttendance",
+        "get_attendance_frequency": "Attendances.GetAttendanceFrequencyAsync; Attendances.CalculateFrequency",
+        "_extract_title_pairs": "Attendances.Parse; Html.TitlePairs in Helpers.cs",
+        "_sanitize_pairs": "Html.TitlePairs in Helpers.cs",
+        "_sanitize_onclick_href": "Html.PopupId in Helpers.cs",
+        "_create_attendance": "Attendances.Parse"
+      },
+      "sha256": "0d8467fc379e30a8a0196e57427e204a80ce579590acac811d76ac7a831b6e29"
+    },
+    {
+      "source": "librus_apix/timetable.py",
+      "target": "src/LibrusApixNet/Timetable.cs",
+      "symbols": {
+        "Period": "Period; PeriodChange",
+        "get_timetable": "Timetable.GetTimetableAsync; Timetable.Parse"
+      },
+      "sha256": "662fd379785cfbe345099af60bceeca0eddf8e33ccd5d1f046af2f8304b8727e"
+    },
+    {
+      "source": "librus_apix/announcements.py",
+      "target": "src/LibrusApixNet/Announcements.cs",
+      "symbols": {
+        "Announcement": "Announcement",
+        "get_announcements": "Announcements.GetAnnouncementsAsync; Announcements.Parse"
+      },
+      "sha256": "090c04b6c6523c6928e40d1a659cb92eb801483f69bec7afadd8f609c2213ed4"
+    },
+    {
+      "source": "librus_apix/messages.py",
+      "target": "src/LibrusApixNet/Messages.cs",
+      "symbols": {
+        "MessageData": "MessageData",
+        "Message": "Message",
+        "recipient_groups": "Messages.RecipientGroupsAsync",
+        "get_recipients": "Messages.GetRecipientsAsync",
+        "send_message": "Messages.SendMessageAsync; SendMessageResult",
+        "unwrap_message_data": "Messages.ParseContent (td.left)",
+        "message_content": "Messages.MessageContentAsync; Messages.ParseContent",
+        "_sanitize_href": "Messages.ParseMessages (href path segment)",
+        "parse_sent": "Messages.ParseSent",
+        "parse": "Messages.Parse",
+        "get_max_page_number": "Messages.GetMaxPageNumberAsync; Html.PageCount in Helpers.cs",
+        "get_received": "Messages.GetReceivedAsync",
+        "get_sent": "Messages.GetSentAsync"
+      },
+      "sha256": "2e12065b6437c43d50b1f695c25ad55be049ba09c99c8bd2d3b0ee879f189b44"
+    },
+    {
+      "source": "librus_apix/homework.py",
+      "target": "src/LibrusApixNet/Homework.cs",
+      "symbols": {
+        "Homework": "Homework",
+        "_sanitize_onclick_href": "Html.PopupId in Helpers.cs",
+        "homework_detail": "HomeworkService.HomeworkDetailAsync; HomeworkService.ParseDetail",
+        "get_homework": "HomeworkService.GetHomeworkAsync; HomeworkService.Parse"
+      },
+      "sha256": "b8ce25c1ea145db18d94c034a51c8154c61186a4548fb573939c9934e0ae476d"
+    },
+    {
+      "source": "librus_apix/schedule.py",
+      "target": "src/LibrusApixNet/Schedule.cs",
+      "symbols": {
+        "Event": "Event",
+        "schedule_detail": "Schedule.ScheduleDetailAsync; Schedule.ParseDetail",
+        "_parse_title_into_pairs": "Html.TitlePairs in Helpers.cs",
+        "get_schedule": "Schedule.GetScheduleAsync; Schedule.Parse",
+        "RecentEvent": "RecentEvent",
+        "_sanitize_data": "Schedule.ParseRecentlyAdded",
+        "get_recently_added_schedule": "Schedule.GetRecentlyAddedScheduleAsync; Schedule.ParseRecentlyAdded"
+      },
+      "sha256": "519e90bd5f9de6ba7cf1e42f58d558f37aba49f63e2903882865c857988f1665"
+    },
+    {
+      "source": "librus_apix/student_information.py",
+      "target": "src/LibrusApixNet/StudentInformation.cs",
+      "symbols": {
+        "StudentInformation": "StudentInformation",
+        "get_student_information": "StudentInformationService.GetStudentInformationAsync; StudentInformationService.Parse"
+      },
+      "sha256": "fec1ffa3dc6410c6f8e67d219bb1f3f3d2da905b0bc0f589a36301767b42c5c0"
+    },
+    {
+      "source": "librus_apix/completed_lessons.py",
+      "target": "src/LibrusApixNet/CompletedLessons.cs",
+      "symbols": {
+        "Lesson": "Lesson",
+        "get_max_page_number": "CompletedLessons.GetMaxPageNumberAsync; Html.PageCount in Helpers.cs",
+        "_sanitize_onclick": "Html.PopupId in Helpers.cs",
+        "_create_lesson": "CompletedLessons.Parse",
+        "get_completed": "CompletedLessons.GetCompletedAsync; CompletedLessons.Parse"
+      },
+      "sha256": "ea671266eda5bcf7952efc7265c3d0ad1b97e777990eba747e1083d2c11bf7bf"
+    },
+    {
+      "source": "librus_apix/notifications.py",
+      "target": "src/LibrusApixNet/Notifications.cs",
+      "symbols": {
+        "NotificationAmount": "NotificationAmount",
+        "get_new_token_notification_amounts": "Notifications.GetNewTokenNotificationAmountsAsync; Notifications.ParseAmounts",
+        "_compare_hrefs": "Notifications.Filter (HashSet)",
+        "_parse_recent_schedule_notification": "Notifications.FilterNew (Schedule; MD5)",
+        "_parse_announcements_notification": "Notifications.FilterNew (Announcements)",
+        "_parse_homework_notification": "Notifications.FilterNew (Homework)",
+        "_parse_messages_notification": "Notifications.FilterNew (Messages)",
+        "_parse_attendance_notification": "Notifications.FilterNew (Attendance)",
+        "_parse_grades_notifications": "Notifications.FilterNew (Grades)",
+        "parse_basic_amount": "Notifications.ParseBasicAmountAsync",
+        "NotificationData": "NotificationData",
+        "NotificationIds": "NotificationIds",
+        "get_initial_notification_data": "Notifications.GetInitialNotificationDataAsync; NotificationResult",
+        "get_new_notification_data": "Notifications.GetNewNotificationDataAsync; NotificationResult"
+      },
+      "sha256": "cf023aa46da160d22d33afa3eaac823ced62ae63034eb102ade2eb8ef71d935c"
+    }
+  ],
+  "tests": [
+    {
+      "source": "tests/conftest.py",
+      "target": "tests/LibrusApixNet.Tests/MockHttp.cs",
+      "sha256": "59f31c31d3ba3985d694c0b607c6dc24ff2f66a70d2cf95c393972753fe14994"
+    },
+    {
+      "source": "tests/test_announcements.py",
+      "target": "tests/LibrusApixNet.Tests/ParserTests.cs",
+      "sha256": "5dbc22a56f97b80f9d22d767e53b5586122c97ce9182dcfbe03426861d14c91c"
+    },
+    {
+      "source": "tests/test_attendance.py",
+      "target": "tests/LibrusApixNet.Tests/AttendanceTests.cs",
+      "sha256": "f33e14a6e36bf361fa873e05b95c359c130a25096189942ad81c48d888bea2f1"
+    },
+    {
+      "source": "tests/test_client.py",
+      "target": "tests/LibrusApixNet.Tests/ClientTests.cs",
+      "sha256": "c9284b0d54f48651e9e67b63dd382fc54726cd8439634bed65a78fcb8c89cb70"
+    },
+    {
+      "source": "tests/test_get_completed_lessons.py",
+      "target": "tests/LibrusApixNet.Tests/ParserTests.cs",
+      "sha256": "23dd5003313eae1d6db5b346a3c66540091e0264b7c266e0828f06d898fc077c"
+    },
+    {
+      "source": "tests/test_grades.py",
+      "target": "tests/LibrusApixNet.Tests/ParserTests.cs",
+      "sha256": "639e747babd774489a5be0a08f8898dfc0f2de8f3d72ee648ace197d545201a7"
+    },
+    {
+      "source": "tests/test_homework.py",
+      "target": "tests/LibrusApixNet.Tests/ParserTests.cs",
+      "sha256": "4c04339795c925cde6d73783b9208d73263f83c38af13e735141e134b564e0ef"
+    },
+    {
+      "source": "tests/test_messages.py",
+      "target": "tests/LibrusApixNet.Tests/RequestTests.cs",
+      "sha256": "5d5af3f40cafd23d5534884fece816f6f60e77bff53217b7bf41851fbc19d58c"
+    },
+    {
+      "source": "tests/test_schedule.py",
+      "target": "tests/LibrusApixNet.Tests/ParserTests.cs",
+      "sha256": "b64b15e0cfa5c7027e40166415fc22ecac34836ee7ecda8f5bc085afb496cf7a"
+    },
+    {
+      "source": "tests/test_student_information.py",
+      "target": "tests/LibrusApixNet.Tests/ParserTests.cs",
+      "sha256": "e82b3f8953bc6a052931ffbc73bfa243b7da7b927ca94c8a993c791aac76cc68"
+    },
+    {
+      "source": "tests/test_timetable.py",
+      "target": "tests/LibrusApixNet.Tests/ParserTests.cs",
+      "sha256": "2cd1365eec9f6a089621374c3ce6979cbfda60f2464ba19edc72584e0574dda2"
+    }
+  ]
+}

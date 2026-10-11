@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/examples/">
+    <Project Path="examples/QuickStart/QuickStart.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/LibrusApixNet/LibrusApixNet.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/LibrusApixNet.Tests/LibrusApixNet.Tests.csproj" />
+  </Folder>
+</Solution>
