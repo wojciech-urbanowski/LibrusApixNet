@@ -6,13 +6,14 @@ Copyright (C) 2026 LibrusApixNet contributors, for the C# port and its additions
 
 LibrusApixNet is a C#/.NET 10 port of [librus-apix](https://github.com/RustySnek/librus-apix), originally authored by Pascal Jodłowski and maintained with the librus-apix contributors. The module layout, behavior and two descriptive-grade regression scenarios were adapted from that project. Port-specific changes are documented in `docs/PORTING.md` and `docs/PORTING.en.md` in the source distribution.
 
-- Upstream baseline: `2fedfe8ffa4933abb884929716519ddbeb8eb32d`.
-- Baseline date: 2026-09-28.
-- Baseline subject: `fix: parse descriptive grades from new schema`.
+- Upstream release: **1.6.0**.
+- Upstream baseline: `c54f05f3b483627328852825fff3e46fab27e87d`.
+- Baseline date: 2026-10-10.
+- Baseline subject: `fix: replace [attr!=] selectors with :not() for soupsieve 3.0 compat`.
 - C# port and publication preparation date: 2026-10-11.
 - Port license: **GNU General Public License, version 3 only** (`GPL-3.0-only`).
 
-The full license is included in `LICENSE`. This port follows the [GPLv3 LICENSE at the pinned upstream revision](https://github.com/RustySnek/librus-apix/blob/2fedfe8ffa4933abb884929716519ddbeb8eb32d/LICENSE). The upstream [setup.cfg at the same revision](https://github.com/RustySnek/librus-apix/blob/2fedfe8ffa4933abb884929716519ddbeb8eb32d/setup.cfg) contains an inconsistent MIT license label and classifier. That discrepancy is recorded here; MIT is not the license of this port.
+The full license is included in `LICENSE`. This port follows the [GPLv3 LICENSE at the pinned upstream revision](https://github.com/RustySnek/librus-apix/blob/c54f05f3b483627328852825fff3e46fab27e87d/LICENSE). The upstream [setup.cfg at the same revision](https://github.com/RustySnek/librus-apix/blob/c54f05f3b483627328852825fff3e46fab27e87d/setup.cfg) contains an inconsistent MIT license label and classifier. That discrepancy is recorded here; MIT is not the license of this port.
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3 of the License.
 

@@ -1,11 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="../../Version.props" />
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>LibrusApixNet</PackageId>
-    <Version>0.1.0</Version>
     <Authors>LibrusApixNet contributors</Authors>
     <Description>Unofficial cross-platform .NET 10 port of RustySnek/librus-apix for Librus Synergia. Provides authentication, grades, attendance, timetables, messages and notifications.</Description>
     <PackageTags>librus;synergia;librus-apix;api;scraper;cross-platform</PackageTags>

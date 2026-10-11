@@ -25,7 +25,11 @@ dotnet test LibrusApixNet.slnx -c Release --no-build --no-restore
 dotnet pack src/LibrusApixNet/LibrusApixNet.csproj -c Release --no-build --no-restore
 ```
 
-The package `LibrusApixNet.0.1.0.nupkg` is written to `artifacts/packages`. This step does not publish it to NuGet.org. To install it in another project, add that directory as a local source and leave NuGet.org enabled for AngleSharp. Substitute your own absolute path:
+The package `LibrusApixNet.1.6.0-beta1.nupkg` is written to `artifacts/packages`. Running `dotnet pack` alone does not publish it to NuGet.org. After publishing is enabled in GitHub Actions, each new version is published following successful CI on `main`; see the [publishing guide](docs/PUBLISHING.en.md).
+
+[Version.props](Version.props) defines the version: `UpstreamVersion` + `-beta` + `BetaNumber`. This is currently the port of `librus-apix` **1.6.0**, beta **1**. Update the upstream version only after porting its changes. NuGet does not allow replacing a published version; reruns skip duplicates. Fixes for the same upstream version require incrementing `BetaNumber`.
+
+After publication, install with `dotnet add package LibrusApixNet --version 1.6.0-beta1`. For a local installation, add the packages directory as a source and leave NuGet.org enabled for AngleSharp. Substitute your own absolute path:
 
 ```powershell
 # PowerShell: run from the source root
@@ -40,7 +44,7 @@ dotnet nuget add source "/absolute/path/to/artifacts/packages" --name LibrusApix
 Then run from your application's directory:
 
 ```sh
-dotnet add package LibrusApixNet --version 0.1.0
+dotnet add package LibrusApixNet --version 1.6.0-beta1
 ```
 
 ## Usage
@@ -102,7 +106,9 @@ var recipients = await Messages.GetRecipientsAsync(client, groups[0]);
 // var sent = await Messages.SendMessageAsync(client, "Subject", "Content", [recipientId]);
 ```
 
-`GradesResult` contains `Semesters`, `Averages` and `Descriptive`. The two semesters use indices 0 and 1. `Gpa.Semester == 0` denotes the annual average. `Grade.Value` returns `double?`: `null` for grades excluded from the average, `+0.5` for a plus and `-0.25` for a minus.
+`GradesResult` contains `Semesters`, `Averages` and `Descriptive`. The two semesters use indices 0 and 1. `Gpa.Semester == 0` denotes the annual average. `Grade.Value` returns `double?`: integer and decimal values (including decimal commas), `+0.5` for a plus and `-0.25` for a minus. It returns `null` for excluded or nonnumeric grades such as `85%`, `85/100` and `A+`; `Grade.Mark` retains the original text.
+
+`Grades.GetGradesAsync` also supports descriptive grades loaded by the gateway API: it refreshes OAuth, resolves the student ID and adds API data where HTML grades are missing. Optional API failures preserve the HTML result; caller cancellation is propagated. The standalone `Grades.Parse` parser does not make network requests. `Client.PostJsonAsync` sends JSON; the caller disposes its response.
 
 Preserved upstream conventions: `Attendance.Semester` is a zero-based HTML block index, and the returned list is reversed when two semesters are present. `Messages.GetMaxPageNumberAsync` returns the last page index, whereas the corresponding `CompletedLessons` method returns the page count. See the [porting guide](docs/PORTING.en.md) for all differences.
 
@@ -122,7 +128,7 @@ The returned state contains IDs already seen; the input state is not modified. D
 
 Tests use representative HTML/JSON and controlled HTTP transport, without an account or a connection to Librus. Two descriptive-grade cases originate from upstream tests. These tests do not confirm operation on a current account or every school's page layout.
 
-The port is based on commit `2fedfe8ffa4933abb884929716519ddbeb8eb32d` from 2026-09-28. The [symbol map and file hashes](docs/upstream-map.json) and [update procedure](docs/PORTING.en.md) allow comparison with later revisions:
+The port is based on commit `c54f05f3b483627328852825fff3e46fab27e87d` from 2026-10-10. The [symbol map and file hashes](docs/upstream-map.json) and [update procedure](docs/PORTING.en.md) allow comparison with later revisions:
 
 ```sh
 pwsh -NoProfile -File ./tools/Compare-Upstream.ps1 -SourcePath ../librus-apix
@@ -134,10 +140,12 @@ pwsh -NoProfile -File ./tools/Compare-Upstream.ps1 -SourcePath ../librus-apix -F
 
 ```sh
 pwsh -NoProfile -File ./tools/Test-CompareUpstream.ps1
-pwsh -NoProfile -File ./tools/Test-Package.ps1 -PackagePath ./artifacts/packages/LibrusApixNet.0.1.0.nupkg
+pwsh -NoProfile -File ./tools/Test-Package.ps1 -PackagePath ./artifacts/packages/LibrusApixNet.1.6.0-beta1.nupkg
 ```
 
 The package check creates a temporary consumer with a separate NuGet cache, forces installation of LibrusApixNet from the local package and downloads AngleSharp from NuGet.org. It does not connect to Librus.
+
+Source code and build files are available in the [public GitHub repository](https://github.com/wojciech-urbanowski/LibrusApixNet). Package metadata identifies the repository and commit used to build it.
 
 ## Console example
 

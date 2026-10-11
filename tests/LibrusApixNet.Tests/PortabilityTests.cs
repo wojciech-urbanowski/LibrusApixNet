@@ -20,6 +20,9 @@ public sealed class PortabilityTests
             Assert.Equal(5.5, grades.Semesters[0]["Matematyka"][0].Value);
             Assert.Equal(3.75, Assert.Single(grades.Semesters[1]["Matematyka"]).Value);
             Assert.Equal(5.5, grades.Averages["Matematyka"][0].NumericValue);
+            Assert.Equal(4.5, new Grade("Math", "4,5", true, "", "", "", 1, "", "", 1).Value);
+            Assert.Equal(85, new Grade("Math", "85", true, "", "", "", 1, "", "", 1).Value);
+            Assert.Null(new Grade("Math", "85%", true, "", "", "", 1, "", "", 1).Value);
             Assert.Equal("2026-09-22", Assert.Single(Grades.Parse(Fixtures.NewDescriptive).Descriptive[0]["Przedmiot"]).Date);
 
             var handler = new MockHttp(request => MockHttp.Response(request.Uri.AbsolutePath switch

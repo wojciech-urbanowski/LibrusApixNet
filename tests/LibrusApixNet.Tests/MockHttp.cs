@@ -4,7 +4,7 @@ using System.Text;
 
 namespace LibrusApixNet.Tests;
 
-internal sealed record RecordedRequest(HttpMethod Method, Uri Uri, string Body, string Cookie);
+internal sealed record RecordedRequest(HttpMethod Method, Uri Uri, string Body, string Cookie, string ContentType);
 
 internal sealed class MockHttp(Func<RecordedRequest, CancellationToken, Task<HttpResponseMessage>> callback) : HttpMessageHandler
 {
@@ -17,7 +17,8 @@ internal sealed class MockHttp(Func<RecordedRequest, CancellationToken, Task<Htt
         cancellationToken.ThrowIfCancellationRequested();
         var snapshot = new RecordedRequest(request.Method, request.RequestUri!,
             request.Content is null ? "" : await request.Content.ReadAsStringAsync(cancellationToken),
-            request.Headers.TryGetValues("Cookie", out var cookies) ? string.Join("; ", cookies) : "");
+            request.Headers.TryGetValues("Cookie", out var cookies) ? string.Join("; ", cookies) : "",
+            request.Content?.Headers.ContentType?.ToString() ?? "");
         Requests.Enqueue(snapshot);
         return await callback(snapshot, cancellationToken);
     }

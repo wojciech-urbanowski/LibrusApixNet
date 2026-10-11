@@ -24,6 +24,11 @@ public sealed record ClientOptions
     public string InfoUrl { get => field ?? BaseUrl + "/informacja"; init; }
     public string CompletedLessonsUrl { get => field ?? BaseUrl + "/zrealizowane_lekcje"; init; }
     public string GatewayApiAttendanceUrl { get => field ?? BaseUrl + "/gateway/api/2.0/Attendances"; init; }
+    public string GatewayApiTokenInfoUrl { get => field ?? BaseUrl + "/gateway/api/2.0/Auth/TokenInfo"; init; }
+    public string GatewayApiUserInfoUrl { get => field ?? BaseUrl + "/gateway/api/2.0/Auth/UserInfo/"; init; }
+    public string GatewayApiUsersUrl { get => field ?? BaseUrl + "/gateway/api/2.0/Users"; init; }
+    public string GatewayApiSubjectsUrl { get => field ?? BaseUrl + "/gateway/api/3.0/Auth/Subjects"; init; }
+    public string GatewayApiDescriptiveGradesUrl { get => field ?? BaseUrl + "/gateway/api/2.0/Auth/DescriptiveGradingSystem/PartialGrades/Student/"; init; }
     public string RefreshOAuthUrl { get => field ?? BaseUrl + "/refreshToken"; init; }
     public string LoginPortalUrl { get => field ?? BaseUrl + "/loguj/portalRodzina?v=1774820765"; init; }
     public string AuthorizationUrl { get => field ?? ApiUrl + "/OAuth/Authorization?client_id=46"; init; }

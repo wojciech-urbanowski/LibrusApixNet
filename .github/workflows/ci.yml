@@ -13,6 +13,8 @@ jobs:
     name: Validate (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
+    outputs:
+      package-version: ${{ steps.version.outputs.version }}
     strategy:
       fail-fast: false
       matrix:
@@ -27,6 +29,11 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
+      - name: Resolve package version
+        id: version
+        run: |
+          $version = ./tools/Get-PackageVersion.ps1
+          "version=$version" >> $env:GITHUB_OUTPUT
       - name: Restore
         run: dotnet restore LibrusApixNet.slnx
       - name: Build
@@ -40,4 +47,53 @@ jobs:
       - name: Pack library
         run: dotnet pack src/LibrusApixNet/LibrusApixNet.csproj -c Release --no-build --no-restore
       - name: Verify package and install in an isolated consumer
-        run: ./tools/Test-Package.ps1 -PackagePath ./artifacts/packages/LibrusApixNet.0.1.0.nupkg
+        run: ./tools/Test-Package.ps1 -PackagePath "./artifacts/packages/LibrusApixNet.${{ steps.version.outputs.version }}.nupkg" -ExpectedVersion "${{ steps.version.outputs.version }}"
+      - name: Store validated package
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v7
+        with:
+          name: nuget-package
+          path: artifacts/packages/LibrusApixNet.${{ steps.version.outputs.version }}.nupkg
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish to NuGet.org
+    needs: validate
+    if: >-
+      vars.NUGET_PUBLISH_ENABLED == 'true' && vars.NUGET_USER != '' &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    concurrency:
+      group: nuget-publish
+      cancel-in-progress: false
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - name: Download the validated package
+        uses: actions/download-artifact@v8
+        with:
+          name: nuget-package
+          path: artifacts/packages
+      - name: NuGet login using Trusted Publishing
+        id: login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ vars.NUGET_USER }}
+      - name: Publish package (existing versions are skipped)
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+          PACKAGE_VERSION: ${{ needs.validate.outputs.package-version }}
+        run: |
+          $package = "./artifacts/packages/LibrusApixNet.$env:PACKAGE_VERSION.nupkg"
+          if (-not (Test-Path -LiteralPath $package)) { throw "Validated package is missing: $package" }
+          dotnet nuget push $package --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate

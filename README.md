@@ -25,7 +25,11 @@ dotnet test LibrusApixNet.slnx -c Release --no-build --no-restore
 dotnet pack src/LibrusApixNet/LibrusApixNet.csproj -c Release --no-build --no-restore
 ```
 
-Paczka `LibrusApixNet.0.1.0.nupkg` powstaje w `artifacts/packages`. Ten etap nie publikuje jej na NuGet.org. Aby użyć jej w osobnym projekcie, dodaj ten katalog jako lokalne źródło, pozostawiając aktywne NuGet.org dla zależności AngleSharp. W poleceniu `dotnet nuget add source` zastąp ścieżkę przykładową własną ścieżką absolutną:
+Paczka `LibrusApixNet.1.6.0-beta1.nupkg` powstaje w `artifacts/packages`. Samo `dotnet pack` nie wysyła jej na NuGet.org. Po włączeniu publikacji w GitHub Actions każda nowa wersja jest publikowana po pomyślnym CI na `main`; opis konfiguracji znajduje się w [przewodniku publikacji](docs/PUBLISHING.md).
+
+Wersję ustala [Version.props](Version.props): `UpstreamVersion` + `-beta` + `BetaNumber`. Obecnie jest to port `librus-apix` **1.6.0**, beta **1**. Wersję upstreamu zmieniaj dopiero po przeniesieniu jego zmian. NuGet nie pozwala nadpisać wydanej wersji; ponowne uruchomienia ją pomijają. Poprawki tej samej wersji upstreamu wymagają zwiększenia `BetaNumber`.
+
+Po publikacji zainstalujesz bibliotekę przez `dotnet add package LibrusApixNet --version 1.6.0-beta1`. Do instalacji lokalnej dodaj katalog paczek jako źródło, pozostawiając aktywne NuGet.org dla AngleSharp. Zastąp ścieżkę przykładową własną ścieżką absolutną:
 
 ```powershell
 # PowerShell: uruchom z katalogu źródeł
@@ -40,7 +44,7 @@ dotnet nuget add source "/absolute/path/to/artifacts/packages" --name LibrusApix
 Następnie, w katalogu aplikacji:
 
 ```sh
-dotnet add package LibrusApixNet --version 0.1.0
+dotnet add package LibrusApixNet --version 1.6.0-beta1
 ```
 
 ## Użycie
@@ -102,7 +106,9 @@ var recipients = await Messages.GetRecipientsAsync(client, groups[0]);
 // var sent = await Messages.SendMessageAsync(client, "Temat", "Treść", [recipientId]);
 ```
 
-`GradesResult` zawiera `Semesters`, `Averages` i `Descriptive`. Dwa semestry zajmują indeksy 0 i 1. `Gpa.Semester == 0` oznacza średnią roczną. `Grade.Value` zwraca `double?`: `null` dla ocen nieliczonych do średniej, `+0.5` dla plusa i `-0.25` dla minusa.
+`GradesResult` zawiera `Semesters`, `Averages` i `Descriptive`. Dwa semestry zajmują indeksy 0 i 1. `Gpa.Semester == 0` oznacza średnią roczną. `Grade.Value` zwraca `double?`: liczby całkowite i dziesiętne (także z przecinkiem), `+0.5` dla plusa i `-0.25` dla minusa. Zwraca `null` dla ocen nieliczonych do średniej oraz nienumerycznych, takich jak `85%`, `85/100` czy `A+`; oryginalny tekst pozostaje w `Grade.Mark`.
+
+`Grades.GetGradesAsync` obsługuje także schemat, w którym oceny opisowe są pobierane z gateway API: odświeża OAuth, ustala identyfikator ucznia i dopisuje dane API tam, gdzie HTML nie zawiera ocen. Błędy opcjonalnego API pozostawiają wynik HTML; anulowanie wywołania jest propagowane. Sam parser `Grades.Parse` nie wykonuje żądań sieciowych. `Client.PostJsonAsync` umożliwia wysyłanie JSON; odpowiedź zwalnia wywołujący.
 
 Zachowane osobliwości źródła: `Attendance.Semester` jest indeksem bloku HTML, liczonym od zera; wynik listy jest odwracany, gdy strona zawiera dwa semestry. `Messages.GetMaxPageNumberAsync` zwraca ostatni indeks strony, a analogiczna metoda `CompletedLessons` zwraca liczbę stron. Szczegóły i wszystkie różnice opisuje [mapa portu](docs/PORTING.md).
 
@@ -122,7 +128,7 @@ Zwrócony stan zawiera identyfikatory już widzianych danych. Stan wejściowy ni
 
 Testy używają reprezentatywnych HTML/JSON i kontrolowanego transportu HTTP, bez konta ani połączenia z Librusem. Dwa scenariusze ocen opisowych pochodzą z testów źródła. Testy nie potwierdzają działania na aktualnym koncie ani wszystkich wariantów stron używanych przez szkoły.
 
-Port bazuje na commicie `2fedfe8ffa4933abb884929716519ddbeb8eb32d` z 2026-09-28. [Mapa symboli i skróty plików](docs/upstream-map.json) oraz [procedura aktualizacji](docs/PORTING.md) pozwalają porównać kolejną wersję:
+Port bazuje na commicie `c54f05f3b483627328852825fff3e46fab27e87d` z 2026-10-10. [Mapa symboli i skróty plików](docs/upstream-map.json) oraz [procedura aktualizacji](docs/PORTING.md) pozwalają porównać kolejną wersję:
 
 ```powershell
 pwsh -NoProfile -File ./tools/Compare-Upstream.ps1 -SourcePath ../librus-apix
@@ -134,10 +140,12 @@ pwsh -NoProfile -File ./tools/Compare-Upstream.ps1 -SourcePath ../librus-apix -F
 
 ```sh
 pwsh -NoProfile -File ./tools/Test-CompareUpstream.ps1
-pwsh -NoProfile -File ./tools/Test-Package.ps1 -PackagePath ./artifacts/packages/LibrusApixNet.0.1.0.nupkg
+pwsh -NoProfile -File ./tools/Test-Package.ps1 -PackagePath ./artifacts/packages/LibrusApixNet.1.6.0-beta1.nupkg
 ```
 
 Test paczki tworzy tymczasowy projekt z osobnym cache NuGet, wymusza instalację LibrusApixNet z lokalnej paczki i pobiera zależność AngleSharp z NuGet.org. Nie łączy się z Librusem.
+
+Kod źródłowy i pliki budowania są dostępne w [publicznym repozytorium GitHub](https://github.com/wojciech-urbanowski/LibrusApixNet). Metadane paczki wskazują repozytorium i commit użyty do jej zbudowania.
 
 ## Przykład konsolowy
 

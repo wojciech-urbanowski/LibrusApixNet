@@ -44,8 +44,18 @@ public sealed class ParserTests
     [InlineData("1", 1)] [InlineData("6+", 6.5)] [InlineData("2-", 1.75)]
     public void GradeValueUsesSourceModifiers(string mark, double expected) => Assert.Equal(expected, NewGrade(mark).Value);
 
-    [Fact]
-    public void InvalidCountingGradeThrows() => Assert.Throws<FormatException>(() => NewGrade("A+").Value);
+    [Theory]
+    [InlineData("85", 85)] [InlineData("100", 100)] [InlineData("4,5", 4.5)] [InlineData("4.5", 4.5)]
+    public void GradeValueSupportsUpstream16NumericFormats(string mark, double expected) => Assert.Equal(expected, NewGrade(mark).Value);
+
+    [Theory]
+    [InlineData("A+")] [InlineData("85%")] [InlineData("85/100")] [InlineData("+")] [InlineData("np")]
+    public void NonNumericCountingGradesPreserveTheirText(string mark)
+    {
+        var grade = NewGrade(mark);
+        Assert.Null(grade.Value);
+        Assert.Equal(mark, grade.Mark);
+    }
 
     private static Grade NewGrade(string mark) => new("Math", mark, true, "", "", "", 1, "", "", 1);
 

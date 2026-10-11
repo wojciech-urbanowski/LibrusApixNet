@@ -1,0 +1,8 @@
+<Project>
+  <PropertyGroup>
+    <!-- Update after porting and verifying the corresponding upstream release. -->
+    <UpstreamVersion>1.6.0</UpstreamVersion>
+    <BetaNumber>1</BetaNumber>
+    <Version>$(UpstreamVersion)-beta$(BetaNumber)</Version>
+  </PropertyGroup>
+</Project>

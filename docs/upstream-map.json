@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "repository": "https://github.com/RustySnek/librus-apix.git",
-  "commit": "2fedfe8ffa4933abb884929716519ddbeb8eb32d",
-  "commitDate": "2026-09-28",
-  "commitSubject": "fix: parse descriptive grades from new schema",
+  "commit": "c54f05f3b483627328852825fff3e46fab27e87d",
+  "commitDate": "2026-10-10",
+  "commitSubject": "fix: replace [attr!=] selectors with :not() for soupsieve 3.0 compat",
   "sourceWorkingTreeClean": true,
   "hashAlgorithm": "SHA256 of UTF-8 text with CRLF normalized to LF",
   "modules": [
@@ -31,9 +31,10 @@
         "Client.refresh_oauth": "Client.RefreshOAuthAsync",
         "Client.post": "Client.PostAsync",
         "Client.get": "Client.GetAsync",
-        "new_client": "Client.NewClient"
+        "new_client": "Client.NewClient",
+        "Client.post_json": "Client.PostJsonAsync"
       },
-      "sha256": "95d6233857b3e72cc11cb11e0b8ab639013fbd81806ef051132811d714b8a4e3"
+      "sha256": "42362916580a20f93b606df67dc2455b3e6031714eedf786a9411015ef2ea382"
     },
     {
       "source": "librus_apix/urls.py",
@@ -41,9 +42,15 @@
       "symbols": {
         "HEADERS": "ClientOptions.UserAgent; FormUrlEncodedContent in Client.cs",
         "*_URL": "ClientOptions.*Url",
-        "GATEWAY_API_ATTENDANCE": "ClientOptions.GatewayApiAttendanceUrl"
+        "GATEWAY_API_ATTENDANCE": "ClientOptions.GatewayApiAttendanceUrl",
+        "GATEWAY_API_URL": "ClientOptions.BaseUrl + /gateway/api (derived base)",
+        "GATEWAY_API_DESCRIPTIVE_GRADES": "ClientOptions.GatewayApiDescriptiveGradesUrl",
+        "GATEWAY_API_TOKEN_INFO": "ClientOptions.GatewayApiTokenInfoUrl",
+        "GATEWAY_API_USERS": "ClientOptions.GatewayApiUsersUrl",
+        "GATEWAY_API_SUBJECTS": "ClientOptions.GatewayApiSubjectsUrl",
+        "GATEWAY_API_USER_INFO": "ClientOptions.GatewayApiUserInfoUrl"
       },
-      "sha256": "b32f04601ae6fb05ad26ab92ade59bbb291ffe3a3d2f41efb1ffeb488945a974"
+      "sha256": "fe02891aaacec7f7bf14b3abc4463f27ed807e480a91fffb98b836c24dc7af4a"
     },
     {
       "source": "librus_apix/helpers.py",
@@ -73,16 +80,17 @@
       "symbols": {
         "Gpa": "Gpa",
         "Grade": "Grade",
-        "Grade.value": "Grade.Value",
+        "Grade.value": "Grade.Value; Grade.Mark preserves non-numeric values",
         "GradeDescriptive": "GradeDescriptive",
         "get_grades": "Grades.GetGradesAsync; GradesResult",
         "_handle_subject": "Grades.Parse (subject cells)",
         "_get_desc_and_counts": "Grades.ExtractGradeInfo",
         "_extract_grade_info": "Grades.ExtractGradeInfo",
         "_extract_grades_numeric": "Grades.Parse (numericMarker)",
-        "_extract_grades_descriptive": "Grades.Parse (descriptiveMarker and summary)"
+        "_extract_grades_descriptive": "Grades.Parse (descriptiveMarker and summary)",
+        "_extract_grades_descriptive_from_api": "Grades.GetGatewayDescriptiveGradesAsync; ClientOptions.GatewayApi*Url"
       },
-      "sha256": "3c4dd7e6464b13ebf99df87cec1b7802965c7b6e819ef6ae197af8747b36b5b5"
+      "sha256": "658ca0919e74372ad5152b858f548135860fcd6d692e762617da38df62cf9d65"
     },
     {
       "source": "librus_apix/attendance.py",
@@ -205,14 +213,14 @@
         "get_initial_notification_data": "Notifications.GetInitialNotificationDataAsync; NotificationResult",
         "get_new_notification_data": "Notifications.GetNewNotificationDataAsync; NotificationResult"
       },
-      "sha256": "cf023aa46da160d22d33afa3eaac823ced62ae63034eb102ade2eb8ef71d935c"
+      "sha256": "c7228c2813a0628fbcb3eb8412bef3287b1ac78b44fb1e7c40638abd4701f979"
     }
   ],
   "tests": [
     {
       "source": "tests/conftest.py",
       "target": "tests/LibrusApixNet.Tests/MockHttp.cs",
-      "sha256": "59f31c31d3ba3985d694c0b607c6dc24ff2f66a70d2cf95c393972753fe14994"
+      "sha256": "41d8bfb83c656bce613a5bb0dc1f46ba744c2f93978d235f040e6203c1b4097a"
     },
     {
       "source": "tests/test_announcements.py",
@@ -237,7 +245,7 @@
     {
       "source": "tests/test_grades.py",
       "target": "tests/LibrusApixNet.Tests/ParserTests.cs",
-      "sha256": "639e747babd774489a5be0a08f8898dfc0f2de8f3d72ee648ace197d545201a7"
+      "sha256": "69a6b94ed27bf8a3558e47c4d69e7dc6ae27a9d0679acd99f5f3de29d7a6d7b7"
     },
     {
       "source": "tests/test_homework.py",
@@ -263,6 +271,17 @@
       "source": "tests/test_timetable.py",
       "target": "tests/LibrusApixNet.Tests/ParserTests.cs",
       "sha256": "2cd1365eec9f6a089621374c3ce6979cbfda60f2464ba19edc72584e0574dda2"
+    },
+    {
+      "source": "tests/test_grades_descriptive_api.py",
+      "target": "tests/LibrusApixNet.Tests/GatewayGradeTests.cs",
+      "sha256": "787e67b978b3e33a2783c080812887224c94f747b7bc873896705dac4847611b"
+    },
+    {
+      "source": "tests/test_live_grades.py",
+      "target": "Not ported: live-account integration; synthetic gateway regressions in tests/LibrusApixNet.Tests/GatewayGradeTests.cs",
+      "sha256": "9afd5fcfc9c8a715c68f889e10feedb4be3b6e9e14c2cb0876762aaff0bb935a"
     }
-  ]
+  ],
+  "version": "1.6.0"
 }

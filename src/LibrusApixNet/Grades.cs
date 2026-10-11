@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using AngleSharp.Dom;
 
@@ -13,15 +14,16 @@ public sealed record Gpa(int Semester, string Average, string Subject)
 public sealed record Grade(string Title, string Mark, bool Counts, string Date, string Href, string Description,
     int Semester, string Category, string Teacher, int Weight)
 {
-    /// <summary>Null means the grade does not count; malformed counting grades throw FormatException.</summary>
+    /// <summary>Null means the grade does not count or has no numeric value; Mark preserves its text.</summary>
     public double? Value
     {
         get
         {
             if (!Counts) return null;
-            if (!Regex.IsMatch(Mark, @"^[0-9](?:[+-])?$")) throw new FormatException("Invalid grade format.");
-            return double.Parse(Mark[..1], CultureInfo.InvariantCulture) +
-                (Mark.EndsWith('+') ? 0.5 : Mark.EndsWith('-') ? -0.25 : 0);
+            if (Regex.IsMatch(Mark, @"^[0-9][+-]$"))
+                return double.Parse(Mark[..1], CultureInfo.InvariantCulture) + (Mark.EndsWith('+') ? 0.5 : -0.25);
+            return double.TryParse(Mark.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out var value)
+                ? value : null;
         }
     }
 }
@@ -38,8 +40,93 @@ public static class Grades
     public static async Task<GradesResult> GetGradesAsync(Client client, string sortBy = "all", CancellationToken cancellationToken = default)
     {
         var filter = Html.Filter(sortBy);
-        return Parse(await client.PostTextAsync(client.Options.GradesUrl,
-            new Dictionary<string, string> { [filter] = "1" }, cancellationToken));
+        var html = await client.PostTextAsync(client.Options.GradesUrl,
+            new Dictionary<string, string> { [filter] = "1" }, cancellationToken);
+        var result = Parse(html);
+        using var document = Html.Parse(html);
+        if (document.QuerySelector("table.newSchemaGradesByStudentTable") is null) return result;
+
+        var subjectNames = new Dictionary<string, string>();
+        foreach (var row in document.QuerySelectorAll("table.newSchemaGradesByStudentTable tr.studentRow"))
+        {
+            var id = row.GetAttribute("data-subject_id");
+            if (id is not null) subjectNames[id] = Html.Text(row.QuerySelectorAll("td").ElementAtOrDefault(1)).Trim();
+        }
+        try
+        {
+            var gatewayGrades = await GetGatewayDescriptiveGradesAsync(client, subjectNames, cancellationToken);
+            for (var semester = 0; semester < 2; semester++)
+                foreach (var (subject, grades) in gatewayGrades[semester])
+                    if (!result.Descriptive[semester].TryGetValue(subject, out var existing) || existing.Count == 0)
+                        result.Descriptive[semester][subject] = grades;
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            // Optional gateway timeout: preserve grades already parsed from HTML.
+        }
+        catch (Exception exception) when (exception is HttpRequestException or LibrusException or JsonException
+            or InvalidOperationException or KeyNotFoundException or FormatException or ArgumentException or OverflowException)
+        {
+            // Upstream treats gateway descriptive grades as optional data.
+        }
+        return result;
+    }
+
+    private static async Task<Dictionary<string, List<GradeDescriptive>>[]> GetGatewayDescriptiveGradesAsync(
+        Client client, Dictionary<string, string> subjectNames, CancellationToken cancellationToken)
+    {
+        var semesters = new[] { new Dictionary<string, List<GradeDescriptive>>(), new Dictionary<string, List<GradeDescriptive>>() };
+        await client.RefreshOAuthAsync(cancellationToken);
+        var tokenInfo = await client.GetJsonAsync(client.Options.GatewayApiTokenInfoUrl, cancellationToken);
+        var userId = JsonText(tokenInfo.GetProperty("UserIdentifier"));
+        var userInfo = await client.GetJsonAsync(client.Options.GatewayApiUserInfoUrl + Uri.EscapeDataString(userId), cancellationToken);
+        var studentId = JsonField(userInfo, "IdentifierOfStudentAssignedWithUser");
+        if (string.IsNullOrEmpty(studentId)) studentId = userId;
+        using var response = await client.PostJsonAsync(client.Options.GatewayApiDescriptiveGradesUrl + Uri.EscapeDataString(studentId),
+            cancellationToken: cancellationToken);
+        response.EnsureSuccessStatusCode();
+        var gradeData = await Client.ReadJsonAsync(response, cancellationToken);
+        if (!gradeData.TryGetProperty("data", out var items) || items.ValueKind == JsonValueKind.Null) return semesters;
+        if (items.GetArrayLength() == 0) return semesters;
+
+        var subjectData = await client.GetJsonAsync(client.Options.GatewayApiSubjectsUrl, cancellationToken);
+        var subjects = subjectData.GetProperty("data").EnumerateArray()
+            .ToDictionary(subject => JsonText(subject.GetProperty("identifier")), subject => subject);
+        var userData = await client.GetJsonAsync(client.Options.GatewayApiUsersUrl, cancellationToken);
+        var teachers = userData.GetProperty("Users").EnumerateArray().ToDictionary(
+            user => JsonText(user.GetProperty("AccountId")),
+            user => (JsonField(user, "LastName") + " " + JsonField(user, "FirstName")).Trim());
+        foreach (var item in items.EnumerateArray())
+        {
+            var semester = int.Parse(JsonText(item.GetProperty("semester")), CultureInfo.InvariantCulture);
+            if (semester is not (1 or 2)) continue;
+            var subjectId = JsonText(item.GetProperty("subjectId"));
+            subjects.TryGetValue(subjectId, out var subject);
+            var title = subjectNames.GetValueOrDefault(JsonField(subject, "numericIdentifier"));
+            if (string.IsNullOrEmpty(title)) title = JsonField(subject, "name");
+            if (string.IsNullOrEmpty(title)) title = subjectId;
+            var mark = JsonField(item, "scaleValue", "value");
+            if (string.IsNullOrEmpty(mark)) mark = "OO";
+            var teacher = teachers.GetValueOrDefault(JsonField(item, "teacherId"), "");
+            var date = JsonField(item, "date");
+            date = date[..Math.Min(10, date.Length)];
+            var description = $"Ocena: {mark}\nPrzedmiot: {title}\nObszar: {JsonField(item, "area", "name")}\n" +
+                $"Data: {date}\nNauczyciel: {teacher}\nTreść oceny: {JsonField(item, "content")}\n" +
+                $"Dodał: {teachers.GetValueOrDefault(JsonField(item, "addedBy"), "")}\nKomentarz: {JsonField(item, "comments")}\n";
+            semesters[semester - 1].TryAdd(title, []);
+            semesters[semester - 1][title].Add(new GradeDescriptive(title, mark, date, "", description, semester, teacher));
+        }
+        return semesters;
+    }
+
+    private static string JsonText(JsonElement value) => value.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined
+        ? "" : value.ValueKind == JsonValueKind.String ? value.GetString() ?? "" : value.ToString();
+
+    private static string JsonField(JsonElement value, params string[] names)
+    {
+        foreach (var name in names)
+            if (value.ValueKind != JsonValueKind.Object || !value.TryGetProperty(name, out value)) return "";
+        return JsonText(value);
     }
 
     public static GradesResult Parse(string html)

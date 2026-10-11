@@ -1,9 +1,13 @@
 #Requires -Version 7.0
 [CmdletBinding()]
-param([string]$PackagePath)
+param([string]$PackagePath, [string]$ExpectedVersion)
 
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $false
+if ([string]::IsNullOrWhiteSpace($ExpectedVersion)) {
+    $ExpectedVersion = & (Join-Path $PSScriptRoot 'Get-PackageVersion.ps1')
+}
+if ($ExpectedVersion -notmatch '^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$') { throw 'Invalid expected package version.' }
 if ([string]::IsNullOrWhiteSpace($PackagePath)) { throw 'Specify -PackagePath pointing to the generated .nupkg.' }
 $packageFile = (Resolve-Path -LiteralPath $PackagePath).Path
 $tempParent = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
@@ -31,7 +35,7 @@ $archive = [System.IO.Compression.ZipFile]::OpenRead($packageFile)
 try {
     [xml]$manifest = Read-Entry $archive 'LibrusApixNet.nuspec'
     $metadata = $manifest.package.metadata
-    Assert-Condition ($metadata.id -eq 'LibrusApixNet' -and $metadata.version -eq '0.1.0') 'Unexpected package identity/version.'
+    Assert-Condition ($metadata.id -eq 'LibrusApixNet' -and $metadata.version -eq $ExpectedVersion) 'Unexpected package identity/version.'
     Assert-Condition ($metadata.authors -eq 'LibrusApixNet contributors') 'Unexpected package authors.'
     Assert-Condition ($metadata.license.type -eq 'expression' -and $metadata.license.InnerText -eq 'GPL-3.0-only') 'Unexpected license metadata.'
     Assert-Condition ($metadata.readme -eq 'README.md') 'Package readme is not configured.'
@@ -40,9 +44,12 @@ try {
     $dependencies = @($metadata.dependencies.group.dependency)
     Assert-Condition (@($dependencies | Where-Object { $_.id -eq 'AngleSharp' -and $_.version -eq '1.8.4' }).Count -eq 1) 'AngleSharp dependency is missing or changed.'
     Assert-Condition ((Read-Entry $archive 'LICENSE').Contains('GNU GENERAL PUBLIC LICENSE')) 'Full GPL license is missing.'
-    Assert-Condition ((Read-Entry $archive 'NOTICE.md').Contains('2fedfe8ffa4933abb884929716519ddbeb8eb32d')) 'Upstream attribution is missing.'
+    $baseline = Get-Content (Join-Path $PSScriptRoot '../docs/upstream-map.json') -Raw | ConvertFrom-Json
+    Assert-Condition ((Read-Entry $archive 'NOTICE.md').Contains($baseline.commit)) 'Upstream attribution is missing.'
     Assert-Condition ((Read-Entry $archive 'README.md').Contains('librus-apix')) 'Package readme is missing attribution.'
     Assert-Condition ($null -eq $archive.GetEntry('lib/net10.0/AngleSharp.dll')) 'AngleSharp must remain a NuGet dependency.'
+    Assert-Condition ($metadata.repository.url -eq 'https://github.com/wojciech-urbanowski/LibrusApixNet.git') 'Repository URL is missing or changed.'
+    Assert-Condition (-not [string]::IsNullOrWhiteSpace($metadata.repository.commit)) 'Repository commit is missing.'
 }
 finally { $archive.Dispose() }
 
@@ -70,7 +77,7 @@ try {
 "@
     [System.IO.File]::WriteAllText($configPath, $config, $utf8)
     $projectPath = Join-Path $tempRoot 'Consumer.csproj'
-    $project = @'
+    $project = @"
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -78,15 +85,20 @@ try {
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
-  <ItemGroup><PackageReference Include="LibrusApixNet" Version="0.1.0" /></ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <PackageReference Include="LibrusApixNet" Version="$ExpectedVersion" />
+  </ItemGroup>
 </Project>
-'@
+"@
     [System.IO.File]::WriteAllText($projectPath, $project, $utf8)
     $program = @'
 using LibrusApixNet;
 
-if (!LibraryInfo.Version.StartsWith("0.1.0", StringComparison.Ordinal))
+var expectedVersion = args.Single();
+if (LibraryInfo.Version != expectedVersion && !LibraryInfo.Version.StartsWith(expectedVersion + "+", StringComparison.Ordinal))
     throw new Exception("Unexpected library version.");
 var grade = new Grade("Math", "6+", true, "2026-10-11", "", "", 1, "", "", 1);
 if (grade.Value != 6.5 || new Gpa(1, "5,50", "Math").NumericValue != 5.5)
@@ -98,7 +110,7 @@ Console.WriteLine($"Local package consumer passed: LibrusApixNet {LibraryInfo.Ve
 '@
     [System.IO.File]::WriteAllText((Join-Path $tempRoot 'Program.cs'), $program, $utf8)
     Invoke-Dotnet @('restore', $projectPath, '--configfile', $configPath, '--packages', (Join-Path $tempRoot 'packages'), '--no-http-cache')
-    Invoke-Dotnet @('run', '--project', $projectPath, '-c', 'Release', '--no-restore')
+    Invoke-Dotnet @('run', '--project', $projectPath, '-c', 'Release', '--no-restore', '--', $ExpectedVersion)
     Write-Host 'Package metadata, contents, isolated local installation and parser execution passed.'
 }
 finally {

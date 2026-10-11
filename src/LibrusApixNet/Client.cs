@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace LibrusApixNet;
@@ -111,6 +112,11 @@ public sealed class Client : IDisposable
     public Task<HttpResponseMessage> PostAsync(string url, IEnumerable<KeyValuePair<string, string>> data,
         CancellationToken cancellationToken = default) => SendAsync(HttpMethod.Post, url, data, true, cancellationToken);
 
+    /// <summary>Posts a JSON body (an empty object by default). Caller disposes the response.</summary>
+    public Task<HttpResponseMessage> PostJsonAsync(string url, object? data = null,
+        CancellationToken cancellationToken = default) =>
+        SendAsync(HttpMethod.Post, url, null, true, cancellationToken, JsonContent.Create(data ?? new { }));
+
     internal async Task<string> GetTextAsync(string url, CancellationToken ct)
     {
         using var response = await GetAsync(url, ct);
@@ -142,7 +148,7 @@ public sealed class Client : IDisposable
     private string? FindCookie(string name) => Cookies.GetAllCookies().Cast<Cookie>().FirstOrDefault(c => c.Name == name)?.Value;
 
     private async Task<HttpResponseMessage> SendAsync(HttpMethod method, string url,
-        IEnumerable<KeyValuePair<string, string>>? data, bool authenticated, CancellationToken ct)
+        IEnumerable<KeyValuePair<string, string>>? data, bool authenticated, CancellationToken ct, HttpContent? content = null)
     {
         var uri = new Uri(url);
         if (authenticated)
@@ -157,6 +163,7 @@ public sealed class Client : IDisposable
                     if (cookie.Name == "oauth_token") cookie.Expired = true;
         }
         using var request = new HttpRequestMessage(method, uri);
+        request.Content = content;
         if (data is not null) request.Content = new FormUrlEncodedContent(data);
         if (_manualCookies)
         {
