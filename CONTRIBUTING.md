@@ -10,7 +10,7 @@ Przed publikacją usuń login, hasło, klucze sesji, ciasteczka (`DZIENNIKSID`, 
 
 Nowe schematy stron utrwalaj jako syntetyczne albo zanonimizowane scenariusze testowe. Zachowaj publiczne API, `CancellationToken` i zależności dostępne na Windows, Linux i macOS. Zmiany przeniesione z Pythona dopisz do [mapy portu](docs/PORTING.md); opisuj świadome różnice względem upstreamu.
 
-Przed wysłaniem zmian uruchom kompilację i testy Release, pakowanie oraz oba skrypty sprawdzające opisane w README. CI powtarza te sprawdzenia na trzech systemach. Nie uruchamiaj automatycznych testów na rzeczywistym koncie Librusa.
+Przed wysłaniem zmian uruchom kompilację i testy Release, pakowanie oraz oba skrypty sprawdzające opisane w [przewodniku dla współtwórców](docs/DEVELOPMENT.md). CI powtarza te sprawdzenia na trzech systemach. Nie uruchamiaj automatycznych testów na rzeczywistym koncie Librusa.
 
 Zmiany do projektu są udostępniane na licencji `GPL-3.0-only`. Zachowuj informacje o autorstwie i pochodzeniu materiałów.
 
@@ -22,6 +22,6 @@ Before publishing, remove usernames, passwords, session keys, cookies (`DZIENNIK
 
 Capture new page layouts in synthetic or sanitized regression fixtures. Preserve the public API, `CancellationToken` support and dependencies available on Windows, Linux and macOS. Record changes ported from Python in the [porting guide](docs/PORTING.en.md), including deliberate differences from upstream.
 
-Before submitting a change, run the Release build and tests, pack the library and run both verification scripts documented in the README. CI repeats these checks on all three systems. Automated tests must not access a live Librus account.
+Before submitting a change, run the Release build and tests, pack the library and run both verification scripts documented in the [development guide](docs/DEVELOPMENT.en.md). CI repeats these checks on all three systems. Automated tests must not access a live Librus account.
 
 Contributions are distributed under `GPL-3.0-only`. Preserve attribution and provenance notices.
