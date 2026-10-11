@@ -1,39 +1,32 @@
 # LibrusApixNet
 
-An unofficial C#/.NET 10 port of [RustySnek/librus-apix](https://github.com/RustySnek/librus-apix) for Librus Synergia. Supports Windows, Linux and macOS through the platform-neutral `net10.0` target.
+[Polski](https://github.com/wojciech-urbanowski/LibrusApixNet/blob/main/README.md) | [English](https://github.com/wojciech-urbanowski/LibrusApixNet/blob/main/README.en.md) | [NuGet](https://www.nuget.org/packages/LibrusApixNet)
 
-The original **librus-apix** library was authored by **Pascal Jodłowski** and is developed with its contributors. This C# port is maintained by LibrusApixNet contributors under **GPL-3.0-only**, following the [upstream LICENSE](https://github.com/RustySnek/librus-apix/blob/c54f05f3b483627328852825fff3e46fab27e87d/LICENSE). The package includes attribution and provenance in `NOTICE.md`.
+A C# library for .NET 10 that provides access to Librus Synergia data. It is a port of [librus-apix](https://github.com/RustySnek/librus-apix) and supports Windows, Linux and macOS.
 
-Provides authentication and sessions, numeric and descriptive grades, attendance, timetables, announcements, messages and recipients, homework, schedules, student information, completed lessons and notifications. This independent project is not affiliated with or endorsed by Librus or the upstream project.
+The original **librus-apix** library was authored by **Pascal Jodłowski** and is developed with its contributors. This port retains **GNU GPL v3** (`GPL-3.0-only`) from the [upstream LICENSE](https://github.com/RustySnek/librus-apix/blob/c54f05f3b483627328852825fff3e46fab27e87d/LICENSE). See [NOTICE.md](https://github.com/wojciech-urbanowski/LibrusApixNet/blob/main/NOTICE.md) for attribution and provenance.
 
-Source code and documentation: [wojciech-urbanowski/LibrusApixNet](https://github.com/wojciech-urbanowski/LibrusApixNet).
+## Features
+
+- Authentication and saved sessions.
+- Numeric and descriptive grades, averages and attendance.
+- Timetables, schedules, homework and completed lessons.
+- Announcements, reading and sending messages.
+- Student information and detection of new data.
 
 ## Installation
 
-This version follows `librus-apix` **1.6.0** with the **beta1** prerelease suffix. Once available on NuGet.org, install it with:
+Add the [NuGet package](https://www.nuget.org/packages/LibrusApixNet/1.6.0-beta2) to your application:
 
 ```sh
-dotnet add package LibrusApixNet --version 1.6.0-beta1
+dotnet add package LibrusApixNet --version 1.6.0-beta2
 ```
 
-GitHub Actions publishes new versions after successful Windows, Linux and macOS checks on `main`, using NuGet Trusted Publishing. Repeated runs skip a version already published. The version is pinned in `Version.props`; it does not automatically track unported Python releases.
+The library requires **.NET 10**. The current release, `1.6.0-beta2`, is a beta port of `librus-apix` 1.6.0. Builds, tests and package installation are checked on all three operating systems in [GitHub Actions](https://github.com/wojciech-urbanowski/LibrusApixNet/actions/workflows/ci.yml).
 
-For a local build, run from the source directory:
+## Quick start
 
-```sh
-dotnet pack src/LibrusApixNet/LibrusApixNet.csproj -c Release
-```
-
-Add the generated `artifacts/packages` directory as a local NuGet source in your application. Keep NuGet.org enabled to restore the AngleSharp dependency:
-
-```sh
-dotnet nuget add source /absolute/path/to/artifacts/packages --name LibrusApixNet-local
-dotnet add package LibrusApixNet --version 1.6.0-beta1
-```
-
-On Windows, substitute the absolute path to your local packages directory and quote it if it contains spaces. The package requires .NET 10; building it requires the .NET 10 SDK. PowerShell 7 is only needed for the repository's maintenance and verification scripts.
-
-## Usage
+This example signs in and reads first-semester grades. Credentials are loaded from the `LIBRUS_USERNAME` and `LIBRUS_PASSWORD` environment variables.
 
 ```csharp
 using LibrusApixNet;
@@ -42,22 +35,32 @@ var username = Environment.GetEnvironmentVariable("LIBRUS_USERNAME")
     ?? throw new InvalidOperationException("Set LIBRUS_USERNAME.");
 var password = Environment.GetEnvironmentVariable("LIBRUS_PASSWORD")
     ?? throw new InvalidOperationException("Set LIBRUS_PASSWORD.");
+
 using var client = new Client();
 await client.GetTokenAsync(username, password);
+
 var result = await Grades.GetGradesAsync(client);
 foreach (var (subject, grades) in result.Semesters[0])
     foreach (var grade in grades)
         Console.WriteLine($"{subject}: {grade.Mark} ({grade.Date})");
 ```
 
-An existing session can be loaded with `new Client(new Token(apiKey))`. Every network operation accepts a `CancellationToken`. Dispose the client when finished; callers also own responses returned directly by `Client.GetAsync`, `PostAsync` and `PostJsonAsync`.
+A saved session can be loaded with `new Client(new Token(apiKey))`. Every network operation accepts a `CancellationToken`; dispose the client with `using`.
 
-Tests use synthetic HTML/JSON and a controlled HTTP handler without connecting to Librus. They do not establish compatibility with a live account or every school's page layout. Windows can be checked locally; Linux and macOS compatibility is confirmed by successful jobs in the repository's CI matrix.
+The [user guide](https://github.com/wojciech-urbanowski/LibrusApixNet/blob/main/docs/USAGE.en.md) covers sessions and proxies, additional operations, notifications and a console example with PowerShell and Bash commands.
+
+## Project status
+
+This is an independent, unofficial project. It is not affiliated with Librus or endorsed by the upstream authors. Tests use synthetic HTML/JSON and controlled HTTP transport. They do not verify a live Librus account or every school's page layout.
+
+## Issues and contributions
+
+Report bugs and suggest changes through [Issues](https://github.com/wojciech-urbanowski/LibrusApixNet/issues). Include a minimal example and sanitized data, without passwords, tokens or session cookies. See [CONTRIBUTING.md](https://github.com/wojciech-urbanowski/LibrusApixNet/blob/main/CONTRIBUTING.md) for details.
+
+Build and test instructions are in the [development guide](https://github.com/wojciech-urbanowski/LibrusApixNet/blob/main/docs/DEVELOPMENT.en.md). The [porting guide](https://github.com/wojciech-urbanowski/LibrusApixNet/blob/main/docs/PORTING.en.md) documents compatibility with the original project.
 
 ## License and provenance
 
-Copyright (C) 2026 LibrusApixNet contributors. Distributed under **GPL-3.0-only**, without warranty. The package includes the full `LICENSE` and `NOTICE.md` with upstream attribution and dependency notices. The original project was authored by Pascal Jodłowski and maintained with the librus-apix contributors.
+LibrusApixNet is distributed under **GPL-3.0-only**, without warranty. The original `librus-apix` library was created by Pascal Jodłowski and its contributors; the C# port is maintained by LibrusApixNet contributors. This release is based on `librus-apix` 1.6.0.
 
-The port's baseline is [commit c54f05f](https://github.com/RustySnek/librus-apix/commit/c54f05f3b483627328852825fff3e46fab27e87d) from 2026-10-10. The pinned upstream license is GPLv3 despite an inconsistent MIT entry in its package metadata. AngleSharp 1.8.4 is a separate dependency under MIT.
-
-The corresponding source and build files are available in the [public GitHub repository](https://github.com/wojciech-urbanowski/LibrusApixNet). Package metadata identifies the repository and the commit used to build this version.
+The package includes the full LICENSE and NOTICE.md. See [LICENSE](https://github.com/wojciech-urbanowski/LibrusApixNet/blob/main/LICENSE) for the full terms. [NOTICE.md](https://github.com/wojciech-urbanowski/LibrusApixNet/blob/main/NOTICE.md) records the upstream commit, port modification date, attribution and the conflicting license label in upstream metadata. The [AngleSharp](https://www.nuget.org/packages/AngleSharp/1.8.4) dependency is licensed under MIT.

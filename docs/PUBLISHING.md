@@ -4,7 +4,7 @@
 
 ## Wersja i przebieg
 
-[Version.props](../Version.props) zawiera `UpstreamVersion` i `BetaNumber`. Z tych wartości powstaje wersja `$(UpstreamVersion)-beta$(BetaNumber)`: obecnie `1.6.0-beta1`. Zmianę wersji Pythona poprzedź przeniesieniem kodu i aktualizacją [mapy upstreamu](upstream-map.json). Nie pobieramy numeru z PyPI podczas każdego builda, ponieważ nowy numer nie oznacza jeszcze zaktualizowanego portu.
+[Version.props](../Version.props) zawiera `UpstreamVersion` i `BetaNumber`. Z tych wartości powstaje wersja `$(UpstreamVersion)-beta$(BetaNumber)`: obecnie `1.6.0-beta2`. Zmianę wersji Pythona poprzedź przeniesieniem kodu i aktualizacją [mapy upstreamu](upstream-map.json). Nie pobieramy numeru z PyPI podczas każdego builda, ponieważ nowy numer nie oznacza jeszcze zaktualizowanego portu.
 
 Workflow [ci.yml](../.github/workflows/ci.yml) testuje Windows, Linux i macOS oraz sprawdza instalację paczki w osobnym projekcie. Zachowuje dokładnie tę paczkę, która przeszła weryfikację na Linux. Zadanie publikacji pobiera ją dopiero po sukcesie całej macierzy i wysyła na NuGet.org przez Trusted Publishing.
 

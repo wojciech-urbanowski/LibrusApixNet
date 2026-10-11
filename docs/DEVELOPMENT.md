@@ -52,7 +52,7 @@ dotnet nuget add source (Resolve-Path ./artifacts/packages).Path --name LibrusAp
 dotnet nuget add source "/absolute/path/to/artifacts/packages" --name LibrusApixNet-local
 ```
 
-Następnie w katalogu aplikacji wykonaj `dotnet add package LibrusApixNet --version 1.6.0-beta1`. NuGet.org pozostaje źródłem zależności AngleSharp. Alternatywnie można użyć odwołania projektowego do `src/LibrusApixNet/LibrusApixNet.csproj`.
+Następnie w katalogu aplikacji wykonaj `dotnet add package LibrusApixNet --version 1.6.0-beta2`. NuGet.org pozostaje źródłem zależności AngleSharp. Alternatywnie można użyć odwołania projektowego do `src/LibrusApixNet/LibrusApixNet.csproj`.
 
 ## Porównanie z upstreamem
 

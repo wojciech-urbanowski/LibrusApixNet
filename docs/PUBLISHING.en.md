@@ -4,7 +4,7 @@
 
 ## Version and workflow
 
-[Version.props](../Version.props) defines `UpstreamVersion` and `BetaNumber`. The package version is `$(UpstreamVersion)-beta$(BetaNumber)`, currently `1.6.0-beta1`. Port and verify an upstream release before updating its version and [upstream map](upstream-map.json). The build does not fetch the latest PyPI version automatically: a new release number does not establish that its code has been ported.
+[Version.props](../Version.props) defines `UpstreamVersion` and `BetaNumber`. The package version is `$(UpstreamVersion)-beta$(BetaNumber)`, currently `1.6.0-beta2`. Port and verify an upstream release before updating its version and [upstream map](upstream-map.json). The build does not fetch the latest PyPI version automatically: a new release number does not establish that its code has been ported.
 
 [ci.yml](../.github/workflows/ci.yml) validates Windows, Linux and macOS, including local package installation in a separate project. It saves the exact package verified on Linux. The publish job downloads that artifact after the entire matrix succeeds, then pushes it to NuGet.org using Trusted Publishing.
 
