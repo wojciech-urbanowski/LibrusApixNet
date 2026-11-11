@@ -54,6 +54,39 @@ public sealed class ClientTests
     }
 
     [Fact]
+    public async Task LoginTreatsUnauthorizedApiRootAsReachable()
+    {
+        // Real api.librus.pl answers 401 "Request is denied" on GET / when the service is up.
+        var handler = new MockHttp(request =>
+        {
+            if (request.Uri.Host == "api.test" && request.Uri.AbsolutePath == "/")
+                return MockHttp.Response("{\"Status\":\"Error\",\"Message\":\"Request is denied\"}", HttpStatusCode.Unauthorized, "application/json");
+            var response = MockHttp.Response(request.Uri.AbsolutePath.EndsWith("Authorization") ? "{\"status\":\"ok\"}" : "{}");
+            if (request.Uri.AbsolutePath.Contains("portalRodzina"))
+            {
+                response.Headers.Add("Set-Cookie", "DZIENNIKSID=abc; Path=/; Secure; HttpOnly");
+                response.Headers.Add("Set-Cookie", "SDZIENNIKSID=def; Path=/; Secure; HttpOnly");
+            }
+            return response;
+        });
+        using var client = new Client(options: MockHttp.Options, handler: handler);
+        var token = await client.GetTokenAsync("user", "pass");
+        Assert.Equal("abc:def", token.ApiKey); Assert.Equal(4, handler.Requests.Count);
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.Forbidden)]
+    [InlineData(HttpStatusCode.InternalServerError)]
+    [InlineData(HttpStatusCode.BadGateway)]
+    public async Task OtherErrorsFromApiRootStillStopLogin(HttpStatusCode status)
+    {
+        var handler = new MockHttp(_ => MockHttp.Response("{}", status));
+        using var client = new Client(options: MockHttp.Options, handler: handler);
+        await Assert.ThrowsAsync<HttpRequestException>(() => client.GetTokenAsync("user", "pass"));
+        Assert.Single(handler.Requests);
+    }
+
+    [Fact]
     public async Task LoginReportsBadCredentials()
     {
         using var client = new Client(options: MockHttp.Options, handler: new MockHttp(request => MockHttp.Response(

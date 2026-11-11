@@ -73,7 +73,10 @@ public sealed class Client : IDisposable
                 catch (JsonException) { }
                 throw new MaintenanceException(message);
             }
-            maintenance.EnsureSuccessStatusCode();
+            // The live API root answers 401 {"Status":"Error","Message":"Request is denied"} when it is up (no authorization
+            // yet), so 401 means "reachable", not a failure. Only 503 signals maintenance; other errors still abort the login.
+            if (maintenance.StatusCode != HttpStatusCode.Unauthorized)
+                maintenance.EnsureSuccessStatusCode();
         }
         using (var portal = await SendAsync(HttpMethod.Get, Options.LoginPortalUrl, null, false, cancellationToken))
             portal.EnsureSuccessStatusCode();
