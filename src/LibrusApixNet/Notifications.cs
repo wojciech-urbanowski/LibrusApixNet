@@ -30,7 +30,10 @@ public sealed record NotificationResult(NotificationData Data, NotificationIds S
 
 public static class Notifications
 {
-    private static readonly HashSet<string> Destinations = ["/ogloszenia", "/moje_zadania", "/wiadomosci", "/przegladaj_oceny/uczen", "/przegladaj_nb/uczen", "/terminarz"];
+    private static readonly HashSet<string> Destinations = ["/ogloszenia", "/moje_zadania", "/wiadomosci", "/wiadomosci3", "/przegladaj_oceny/uczen", "/przegladaj_nb/uczen", "/terminarz"];
+
+    /// <summary>The messages entry of the panel menu: current Synergia links it to /wiadomosci3, older layouts to /wiadomosci.</summary>
+    public static bool IsMessagesDestination(string destination) => destination is "/wiadomosci" or "/wiadomosci3";
 
     public static async Task<List<NotificationAmount>> GetNewTokenNotificationAmountsAsync(Client client, CancellationToken cancellationToken = default) =>
         ParseAmounts(await client.GetTextAsync(client.Options.IndexUrl, cancellationToken));
@@ -55,8 +58,9 @@ public static class Notifications
     {
         var data = new NotificationData();
         var seen = new NotificationIds();
-        if (amount.Amount == 0 && amount.Destination is not ("/ogloszenia" or "/moje_zadania" or "/wiadomosci")) return new(data, seen);
-        switch (amount.Destination)
+        var destination = IsMessagesDestination(amount.Destination) ? "/wiadomosci" : amount.Destination;
+        if (amount.Amount == 0 && destination is not ("/ogloszenia" or "/moje_zadania" or "/wiadomosci")) return new(data, seen);
+        switch (destination)
         {
             case "/przegladaj_oceny/uczen":
                 var grades = await Grades.GetGradesAsync(client, "last_login", cancellationToken);

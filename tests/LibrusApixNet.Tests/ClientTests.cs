@@ -74,6 +74,33 @@ public sealed class ClientTests
         Assert.Equal("abc:def", token.ApiKey); Assert.Equal(4, handler.Requests.Count);
     }
 
+    [Fact]
+    public async Task LoginTakesSessionCookiesFromSynergiaNotFromApiHost()
+    {
+        // Real api.librus.pl sets its own host-only DZIENNIKSID on the very first request (the maintenance probe).
+        // The token must use the cookies that belong to the Synergia host.
+        var handler = new MockHttp(request =>
+        {
+            var probe = request.Uri.Host == "api.test" && request.Uri.AbsolutePath == "/";
+            var response = probe
+                ? MockHttp.Response("{\"Status\":\"Error\",\"Message\":\"Request is denied\"}", HttpStatusCode.Unauthorized, "application/json")
+                : MockHttp.Response(request.Uri.AbsolutePath.EndsWith("Authorization") ? "{\"status\":\"ok\"}" : "{}");
+            if (request.Uri.Host == "api.test") response.Headers.Add("Set-Cookie", "DZIENNIKSID=from-api; Path=/; Secure; HttpOnly");
+            if (request.Uri.AbsolutePath.Contains("portalRodzina"))
+            {
+                response.Headers.Add("Set-Cookie", "DZIENNIKSID=abc; Path=/; Secure; HttpOnly");
+                response.Headers.Add("Set-Cookie", "SDZIENNIKSID=def; Path=/; Secure; HttpOnly");
+            }
+            return response;
+        });
+        using var client = new Client(options: MockHttp.Options, handler: handler);
+        var token = await client.GetTokenAsync("user", "pass");
+        Assert.Equal("abc:def", token.ApiKey);
+        using var response = await client.GetAsync(client.Options.InfoUrl);
+        Assert.Contains("DZIENNIKSID=abc", handler.Requests.Last().Cookie);
+        Assert.DoesNotContain("from-api", handler.Requests.Last().Cookie);
+    }
+
     [Theory]
     [InlineData(HttpStatusCode.Forbidden)]
     [InlineData(HttpStatusCode.InternalServerError)]

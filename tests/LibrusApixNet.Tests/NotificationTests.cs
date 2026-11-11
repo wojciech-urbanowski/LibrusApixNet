@@ -27,6 +27,45 @@ public sealed class NotificationTests
         Assert.Equal(0, Notifications.ParseAmounts("<div id='graphic-menu'><ul><li><a href='/wiadomosci'>Wiadomości</a><a class='button counter'>?</a></li></ul></div>")[0].Amount);
     }
 
+    // Panel menu as served by the live Synergia (parent and student accounts): messages link to /wiadomosci3, a counter exists
+    // only when non-zero, and the first entry (alternative view) is not a notification module.
+    private const string LiveMenu = """
+        <div id="graphic-menu"><ul>
+        <li><a href="/gateway/ms/studentdatapanel/ui/">Widok alternatywny</a></li>
+        <li><a href="/przegladaj_oceny/uczen">Oceny</a></li>
+        <li><a href="/przegladaj_nb/uczen">Frekwencja</a></li>
+        <li><a href="/wiadomosci3">Wiadomości</a><a class="button counter">1</a></li>
+        <li><a href="/ogloszenia">Ogłoszenia</a></li>
+        <li><a href="/terminarz">Terminarz</a></li>
+        <li><a href="/moje_zadania">Zadania domowe</a></li>
+        <li><a href="javascript:void(0);">&nbsp; ? &nbsp;</a></li>
+        </ul></div>
+        """;
+
+    [Fact]
+    public void LiveMenuMessagesEntryAtWiadomosci3IsRecognizedWithItsCounter()
+    {
+        var amounts = Notifications.ParseAmounts(LiveMenu);
+        Assert.Equal(6, amounts.Count);
+        var messages = Assert.Single(amounts, a => a.Destination == "/wiadomosci3");
+        Assert.Equal("Wiadomości", messages.Name); Assert.Equal(1, messages.Amount);
+        Assert.All(amounts.Where(a => a != messages), a => Assert.Equal(0, a.Amount));
+        Assert.True(Notifications.IsMessagesDestination("/wiadomosci3")); Assert.True(Notifications.IsMessagesDestination("/wiadomosci"));
+        Assert.False(Notifications.IsMessagesDestination("/wiadomosci/1/5")); Assert.False(Notifications.IsMessagesDestination("/ogloszenia"));
+    }
+
+    [Fact]
+    public async Task MessagesCounterAtWiadomosci3FetchesReceivedMessages()
+    {
+        using var client = MockHttp.Create(request => request.Uri.AbsolutePath == "/wiadomosci/1/5"
+            ? MockHttp.Response(Fixtures.Received) : throw new InvalidOperationException("Unexpected endpoint"));
+        var withNew = await Notifications.ParseBasicAmountAsync(client, new NotificationAmount("Wiadomości", "/wiadomosci3", 1));
+        Assert.Single(withNew.Data.Messages);
+        // Like /wiadomosci, a zero counter still seeds the state from the list.
+        var zero = await Notifications.ParseBasicAmountAsync(client, new NotificationAmount("Wiadomości", "/wiadomosci3", 0));
+        Assert.Equal(new[] { "42", "41" }, zero.Seen.Messages);
+    }
+
     [Fact]
     public void FilteringIsIdempotentAndDoesNotMutateInputState()
     {

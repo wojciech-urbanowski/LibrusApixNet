@@ -148,7 +148,10 @@ public sealed class Client : IDisposable
         return document.RootElement.Clone();
     }
 
-    private string? FindCookie(string name) => Cookies.GetAllCookies().Cast<Cookie>().FirstOrDefault(c => c.Name == name)?.Value;
+    // Only cookies that apply to the Synergia host count: api.librus.pl sets its own DZIENNIKSID (even on the maintenance
+    // probe) and the container's enumeration order is not stable, so searching all cookies could mix the two hosts' values.
+    private string? FindCookie(string name) => Cookies.GetCookies(new Uri(Options.BaseUrl)).Cast<Cookie>()
+        .Where(c => c.Name == name).OrderByDescending(c => c.TimeStamp).FirstOrDefault()?.Value;
 
     private async Task<HttpResponseMessage> SendAsync(HttpMethod method, string url,
         IEnumerable<KeyValuePair<string, string>>? data, bool authenticated, CancellationToken ct, HttpContent? content = null)
