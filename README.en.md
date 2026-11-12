@@ -16,13 +16,13 @@ The original **librus-apix** library was authored by **Pascal Jodłowski** and i
 
 ## Installation
 
-Add the [NuGet package](https://www.nuget.org/packages/LibrusApixNet/1.6.0-beta4) to your application:
+Add the [NuGet package](https://www.nuget.org/packages/LibrusApixNet/1.6.0) to your application:
 
 ```sh
-dotnet add package LibrusApixNet --version 1.6.0-beta4
+dotnet add package LibrusApixNet --version 1.6.0
 ```
 
-The library requires **.NET 10**. The current release, `1.6.0-beta4`, is a beta port of `librus-apix` 1.6.0. Builds, tests and package installation are checked on all three operating systems in [GitHub Actions](https://github.com/wojciech-urbanowski/LibrusApixNet/actions/workflows/ci.yml).
+The library requires **.NET 10**. The current release, `1.6.0`, is the first stable release of the `librus-apix` 1.6.0 port. Builds, tests and package installation are checked on all three operating systems in [GitHub Actions](https://github.com/wojciech-urbanowski/LibrusApixNet/actions/workflows/ci.yml).
 
 ## Quick start
 

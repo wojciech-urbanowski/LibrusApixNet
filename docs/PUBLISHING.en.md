@@ -4,11 +4,11 @@
 
 ## Version and workflow
 
-[Version.props](../Version.props) defines `UpstreamVersion` and `BetaNumber`. The package version is `$(UpstreamVersion)-beta$(BetaNumber)`, currently `1.6.0-beta4`. Port and verify an upstream release before updating its version and [upstream map](upstream-map.json). The build does not fetch the latest PyPI version automatically: a new release number does not establish that its code has been ported.
+[Version.props](../Version.props) defines the port version (`Version`, currently stable `1.6.0`) independently of the source Python library version (`UpstreamVersion`, currently `1.6.0`). Stable releases have no prerelease suffix. Port and verify an upstream release before updating its version and [upstream map](upstream-map.json). The build does not fetch the latest PyPI version automatically: a new release number does not establish that its code has been ported.
 
 [ci.yml](../.github/workflows/ci.yml) validates Windows, Linux and macOS, including local package installation in a separate project. It saves the exact package verified on Linux. The publish job downloads that artifact after the entire matrix succeeds, then pushes it to NuGet.org using Trusted Publishing.
 
-Publishing runs on pushes to `main` and manual CI runs on `main`. Pull requests and other branches run checks without publishing. `--skip-duplicate` skips versions already published; code changes with the same version do not replace a package on NuGet. Increment `BetaNumber` for a new revision of the same upstream version (for example, `2`), or update the upstream version and reset `BetaNumber` to `1` when porting a new release.
+Publishing runs on pushes to `main` and manual CI runs on `main`. Pull requests and other branches run checks without publishing. `--skip-duplicate` skips versions already published; code changes with the same version do not replace a package on NuGet. Increment `Version` for a compatible port fix (for example, `1.6.1`), leaving `UpstreamVersion` unchanged. When porting a new upstream release, also update `UpstreamVersion` and the port map. A test release requires an explicit suffix in `Version`, such as `1.7.0-beta1`.
 
 ## Initial setup
 
@@ -34,7 +34,7 @@ Publishing runs on pushes to `main` and manual CI runs on `main`. Pull requests 
 | `NUGET_PUBLISH_ENABLED` | `true` after saving the policy |
 
 6. Open [Actions → CI](https://github.com/wojciech-urbanowski/LibrusApixNet/actions/workflows/ci.yml), choose **Run workflow**, select `main` and start the run. A subsequent push to `main` also starts publication.
-7. After **Publish to NuGet.org** succeeds, check [LibrusApixNet on NuGet](https://www.nuget.org/packages/LibrusApixNet). Indexing is asynchronous; enable prerelease packages in your package client when necessary.
+7. After **Publish to NuGet.org** succeeds, check [LibrusApixNet on NuGet](https://www.nuget.org/packages/LibrusApixNet). Indexing is asynchronous. Stable `1.6.0` does not require enabling prerelease packages in your package client.
 
 Until both variables are configured, publishing is skipped. To disable publishing, set `NUGET_PUBLISH_ENABLED` to `false`; CI continues to run.
 

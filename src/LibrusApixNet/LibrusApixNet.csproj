@@ -10,7 +10,7 @@
     <Authors>LibrusApixNet contributors</Authors>
     <Description>Unofficial cross-platform .NET 10 port of RustySnek/librus-apix for Librus Synergia. Provides authentication, grades, attendance, timetables, messages and notifications.</Description>
     <PackageTags>librus;synergia;librus-apix;api;scraper;cross-platform</PackageTags>
-    <PackageReleaseNotes>Fixed session token creation to use cookies applicable to the Synergia host instead of cookies from the API host, preferring the most recently set value. Message notifications now recognize both /wiadomosci3 and /wiadomosci menu links. Added regression tests and updated documentation.</PackageReleaseNotes>
+    <PackageReleaseNotes>First stable release of the .NET 10 port of librus-apix 1.6.0 for Windows, Linux and macOS. Includes authentication and saved sessions, numeric and descriptive grades, attendance, timetables, homework, announcements, messages and notifications. Includes the beta fixes for API root login, Synergia session cookies and message notification links. Updated installation and publishing documentation for stable releases.</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/wojciech-urbanowski/LibrusApixNet</PackageProjectUrl>
     <RepositoryUrl>https://github.com/wojciech-urbanowski/LibrusApixNet.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
